@@ -1,11 +1,9 @@
-﻿// See https://aka.ms/new-console-template for more information
-//Console.WriteLine("Hello, World!");
-// https://datsedenspace.datsteam.dev
-//https://datsedenspace.datsteam.dev/player/travel
-
+﻿
 using System;
+using System.IO;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using EdenSpaceTRY;
 using Newtonsoft.Json;
 
@@ -68,12 +66,12 @@ class Program
             }
         }
 
-        var shortestPath = FindShortestPathToEden(planetRoutes, startName);
+        var shortestPathToEden = FindShortestPathToEden(planetRoutes, startName);
 
-        if (shortestPath != null)
+        if (shortestPathToEden != null)
         {
             Console.WriteLine("\nСамый короткий путь до планеты Eden:");
-            foreach (var planet in shortestPath)
+            foreach (var planet in shortestPathToEden.Planets)
             {
                 Console.WriteLine(planet);
             }
@@ -83,7 +81,7 @@ class Program
             Console.WriteLine("\nПланета Eden недоступна.");
         }
 
-        static List<string> FindShortestPathToEden(Dictionary<string, List<Route>> planetRoutes, string startPlanet)
+        static PlanetsPath FindShortestPathToEden(Dictionary<string, List<Route>> planetRoutes, string startPlanet)
         {
             var distances = new Dictionary<string, long>();
             var previous = new Dictionary<string, string>();
@@ -119,15 +117,18 @@ class Program
 
             if (!previous.ContainsKey("Eden")) return null;
 
-            var path = new List<string>();
-            var planet = "Eden"; // Начинаем с предыдущей планеты перед Eden
+            var planetsPath = new PlanetsPath();
+            var planet = "Eden"; // Начинаем с планеты Eden
             while (planet != null && planet != startPlanet)
             {
-                path.Insert(0, planet);
+                planetsPath.Planets.Insert(0, planet);
                 planet = previous[planet];
             }
 
-            return path;
+            // Добавляем стартовую планету в начало списка планет
+           // planetsPath.Planets.Insert(0, startPlanet);
+
+            return planetsPath;
         }
 
         static string ExtractMin(HashSet<string> queue, Dictionary<string, long> distances)
@@ -148,101 +149,25 @@ class Program
             return minPlanet;
         }
 
-        /*
-        static List<string> FindShortestPathToEden(Dictionary<string, List<Route>> planetRoutes, string startPlanet)
-        {
-            var distances = new Dictionary<string, long>();
-            var previous = new Dictionary<string, string>();
-            var queue = new HashSet<string>();
+        var pathJson = JsonConvert.SerializeObject(shortestPathToEden);
 
-         
-
-            foreach (var planetName in planetRoutes.Keys)
-            {
-                //if (planetName != startPlanet)
-                {
-                    distances[planetName] = long.MaxValue;
-                    previous[planetName] = null;
-                    queue.Add(planetName);
-                }
-
-                //if (planetName == startPlanet) continue;
-
-            }
-
-            //distances[startPlanet] = 0;
-
-            distances[startPlanet] = long.MaxValue;
-
-            while (queue.Count > 0)
-            {
-                var currentPlanet = ExtractMin(queue, distances);
-                if (currentPlanet == "Eden")
-                {
-                    break;
-                }
-
-                foreach (var route in planetRoutes[currentPlanet])
-                {
-                    //if (currentPlanet != startPlanet)
-                    {
-                        var alt = distances[currentPlanet] + route.Distance;
-                        if (alt < distances[route.TargetPlanet])
-                        {
-                            distances[route.TargetPlanet] = alt;
-                            previous[route.TargetPlanet] = currentPlanet;
-                        }
-                    }
-                    
-                }
-            }
-
-            if (!previous.ContainsKey("Eden")) return null;
-
-            var path = new List<string>();
-            var planet = "Eden";
-            while (planet != null)
-            {
-                path.Insert(0, planet);
-                planet = previous[planet];
-            }
-
-            return path;
-        }
-
-        static string ExtractMin(HashSet<string> queue, Dictionary<string, long> distances)
-        {
-            var minDistance = long.MaxValue;
-            string minPlanet = null;
-
-            foreach (var planet in queue)
-            {
-                if (distances[planet] < minDistance)
-                {
-                    minDistance = distances[planet];
-                    minPlanet = planet;
-                }
-            }
-
-            queue.Remove(minPlanet);
-            return minPlanet;
-        }*/
-
-        /*
+        // Создаем StringContent с JSON строкой
+        //var contentRoute = new StringContent(pathJson, Encoding.UTF8, "application/json");
+        
         using (var httpClient = new HttpClient())
         {
             // Добавляем токен в заголовок каждого запроса
             httpClient.DefaultRequestHeaders.Add("X-Auth-Token", token);//$"Bearer {token}");
+            var content = new StringContent(pathJson, Encoding.UTF8, "application/json");
 
-            using (var response = await httpClient.PostAsync(routeTravel,))
+            using (var response = await httpClient.PostAsync(routeTravel, content))
             {
                 string apiResponse = await response.Content.ReadAsStringAsync();
-                dynamic result = JsonConvert.DeserializeObject(apiResponse);
-
                 Console.WriteLine(apiResponse);
-                jsonResponse = apiResponse;
+                dynamic result = JsonConvert.DeserializeObject(apiResponse);
+                //jsonResponse = apiResponse;
                 // Обрабатываем результат...
             }
-        }*/
+        }
     }
 }

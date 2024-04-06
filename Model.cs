@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -29,21 +30,11 @@ namespace EdenSpaceTRY
             public object garbage { get; set; }
         }
     }
-
-    /*public class Ship
+    public class PlanetsPath
     {
-        public int fuelUsed { get; set; }
-        public Planet planet { get; set; }
-        public int capacityX { get; set; }
-        public int capacityY { get; set; }
-        public object garbage { get; set; }
-    }*/
-
-   /* public class Planet
-    {
-        public string name { get; set; }
-        public object garbage { get; set; }
-    }*/
+        [JsonProperty("planets")]
+        public List<string> Planets { get; set; }
+    }
 
     public class Route
     {
