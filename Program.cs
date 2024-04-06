@@ -71,7 +71,8 @@ class Program
         if (shortestPathToEden != null)
         {
             Console.WriteLine("\nСамый короткий путь до планеты Eden:");
-            foreach (var planet in shortestPathToEden.Planets)
+            //foreach (var planet in shortestPathToEden.Planets)
+            foreach (var planet in shortestPathToEden)
             {
                 Console.WriteLine(planet);
             }
@@ -81,7 +82,7 @@ class Program
             Console.WriteLine("\nПланета Eden недоступна.");
         }
 
-        static PlanetsPath FindShortestPathToEden(Dictionary<string, List<Route>> planetRoutes, string startPlanet)
+        /*static PlanetsPath FindShortestPathToEden(Dictionary<string, List<Route>> planetRoutes, string startPlanet)
         {
             var distances = new Dictionary<string, long>();
             var previous = new Dictionary<string, string>();
@@ -129,6 +130,70 @@ class Program
            // planetsPath.Planets.Insert(0, startPlanet);
 
             return planetsPath;
+        }
+
+        static string ExtractMin(HashSet<string> queue, Dictionary<string, long> distances)
+        {
+            var minDistance = long.MaxValue;
+            string minPlanet = null;
+
+            foreach (var planet in queue)
+            {
+                if (distances[planet] < minDistance)
+                {
+                    minDistance = distances[planet];
+                    minPlanet = planet;
+                }
+            }
+
+            queue.Remove(minPlanet);
+            return minPlanet;
+        }*/
+        static List<string> FindShortestPathToEden(Dictionary<string, List<Route>> planetRoutes, string startPlanet)
+        {
+            var distances = new Dictionary<string, long>();
+            var previous = new Dictionary<string, string>();
+            var queue = new HashSet<string>();
+
+            foreach (var planetName in planetRoutes.Keys)
+            {
+                distances[planetName] = long.MaxValue;
+                previous[planetName] = null;
+                queue.Add(planetName);
+            }
+
+            distances[startPlanet] = 0;
+
+            while (queue.Count > 0)
+            {
+                var currentPlanet = ExtractMin(queue, distances);
+                if (currentPlanet == "Eden")
+                {
+                    break;
+                }
+
+                foreach (var route in planetRoutes[currentPlanet])
+                {
+                    var alt = distances[currentPlanet] + route.Distance;
+                    if (alt < distances[route.TargetPlanet])
+                    {
+                        distances[route.TargetPlanet] = alt;
+                        previous[route.TargetPlanet] = currentPlanet;
+                    }
+                }
+            }
+
+            if (!previous.ContainsKey("Eden")) return null;
+
+            var path = new List<string>();
+            var planet = "Eden"; // Начинаем с предыдущей планеты перед Eden
+            while (planet != null && planet != startPlanet)
+            {
+                path.Insert(0, planet);
+                planet = previous[planet];
+            }
+
+            return path;
         }
 
         static string ExtractMin(HashSet<string> queue, Dictionary<string, long> distances)
