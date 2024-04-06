@@ -13,7 +13,7 @@ class Program
     {
         string token = "660ce6bc4396b660ce6bc4396e"; // Замените на ваш токен
         string routeUniverse = "https://datsedenspace.datsteam.dev/player/universe";
-        string routeTravel = "https://datsedenspace.datsteam.dev/player/tarvel";
+        string routeTravel = "https://datsedenspace.datsteam.dev/player/travel";
         string routeCollect = "https://datsedenspace.datsteam.dev/player/collect";
 
         string jsonResponse;
@@ -150,6 +150,7 @@ class Program
         }
 
         var pathJson = JsonConvert.SerializeObject(shortestPathToEden);
+        Console.WriteLine(pathJson);
 
         // Создаем StringContent с JSON строкой
         //var contentRoute = new StringContent(pathJson, Encoding.UTF8, "application/json");
