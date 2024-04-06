@@ -34,6 +34,10 @@ namespace EdenSpaceTRY
     {
         [JsonProperty("planets")]
         public List<string> Planets { get; set; }
+        public PlanetsPath()
+        {
+            Planets = new List<string>();
+        }
     }
 
     public class Route
